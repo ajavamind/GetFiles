@@ -41,13 +41,8 @@ import java.net.URL;
 //import java.net.HttpURLConnection;
 //import java.io.BufferedInputStream;
 
-//  "http://127.0.0.1:8080/"
-//"http://192.168.1.155:8080/"
-//  "https://andymodlaphotography.blogspot.com/"
-//"http://www.3dculture.com/bm3d/2008/2008h_m.htm"
-//"http://3dculture.com/bm3d/2019/2019h_m.htm"
-// "http://192.168.1.104:8080/", // Samsung S8 left
-//  "http://192.168.1.62:8080/"  // Sony XZ Premium
+//"http://192.168.1.104:8080/", // Samsung S8 left
+//"http://192.168.1.62:8080/"  // Sony XZ Premium
 //"http://192.168.1.224:8080/", // Samsung S8 right
 //"http://192.168.1.106:8080/" // Samsung S6 left
 //"http://192.168.1.xxx:8080/" // Samsung S6 right
