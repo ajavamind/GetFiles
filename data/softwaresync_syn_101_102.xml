@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<configuration>
+  <storage
+    rawOnly="false"
+	/>
+  <httpserver  
+    httpurl= "http://192.168.0.102:8080/"
+	name= "Left Camera"
+	savefolder = "F:/data/photos/2020_07_22_Software_Sync"
+	suffix= "_l"
+	filter="SYN_"
+	rotate= "180"
+	flip= "0"
+	/>
+  <httpserver  
+    httpurl= "http://192.168.0.101:8080/"
+	name= "Right Camera"
+	savefolder = "F:/data/photos/2020_07_22_Software_Sync"
+	suffix= "_r"
+	filter="SYN_"
+	rotate= "0"
+	flip= "0"
+	/>
+  <trigger
+    ipaddr="192.168.0.102"
+	port= "8000"
+	name="Samsung S8 Left"
+	/>
+  <trigger
+    ipaddr="192.168.0.101"
+	port= "8000"
+	name="Samsung S8 Right"
+	/>
+</configuration>

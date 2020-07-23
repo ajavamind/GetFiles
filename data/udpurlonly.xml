@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<configuration>
+  <trigger
+    ipaddr="192.168.1.104"
+	port= "8000"
+	name="Samsung S8 Left"
+	/>
+  <trigger
+    ipaddr="192.168.1.224"
+	port= "8000"
+	name="Samsung S8 Right"
+	/>
+</configuration>

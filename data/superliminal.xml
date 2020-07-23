@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<configuration>
+  <scan
+    pattern="img src=\&quot;(.*?)\&quot;"
+	/>
+  <httpserver  
+    httpurl= "http://superliminal.com/stereo/occ/2020.html"
+	name= "Superliminal"
+	savefolder = "F:/data/photos/2020_Superliminal_com_3D"
+	suffix= "_l"
+	/>
+</configuration>
