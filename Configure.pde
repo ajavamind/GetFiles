@@ -4,19 +4,6 @@ static final int XML_ERROR = -1;
 volatile File xmlFile;
 XML xml;
 
-void fileSelected(File selection) {
-  if (selection == null) {
-    println("Selection window was closed or the user hit cancel.");
-    showMsg("Selection window was closed or canceled.");
-    xmlFile = null;
-    found = true;
-  } else {
-    xmlFile = selection;
-    println("User selected " + selection.getAbsolutePath());
-    found = true;
-  }
-}
-
 /** read XML file to configure
  * call from setup() only
  * return 0 ok XML_ERROR
@@ -27,11 +14,12 @@ int configure(String xmlFilename) {
     delay(100);
   }
   if (xmlFile != null) {
-    String name = xmlFile.getAbsolutePath();
+    //String name = xmlFile.getAbsolutePath();
+    String name = xmlFile.getName();
     String[] xmlS = loadStrings(name);
-    //for (int i=0; i<xmlS.length; i++) {
-    //  println(xmlS[i]);
-    //}
+    for (int i=0; i<xmlS.length; i++) {
+      println(xmlS[i]);
+    }
     xmlFilename = "temp_$.xml";
     saveStrings(xmlFilename, xmlS);
     println("XML configuration file "+xmlFilename);

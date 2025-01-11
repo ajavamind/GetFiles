@@ -1,12 +1,12 @@
 // Processing sketch in Java or Android mode transfers
-// photo and video files from twin camera Android phones 
-// that run the Android Google Play "Open Camera Remote" app 
+// photo and video files from twin camera Android phones
+// that run the Android Google Play "Open Camera Remote" app
 // with the HTTP server turned on.
 
 // Written by Andy Modla June 2020
 
 // To use with your computer and phones:
-// Modify XML configuration file to change 
+// Modify XML configuration file to change
 // where photos will be stored
 // Set URLs for one, two or more HTTP web servers
 // Set optional trigger URLs.
@@ -36,7 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
-import select.files.*;
+import android.os.Environment;
 import java.net.URL;
 //import java.net.HttpURLConnection;
 //import java.io.BufferedInputStream;
@@ -46,7 +46,7 @@ import java.net.URL;
 //"http://192.168.1.224:8080/", // Samsung S8 right
 //"http://192.168.1.106:8080/" // Samsung S6 left
 //"http://192.168.1.xxx:8080/" // Samsung S6 right
-//"http://192.168.1.128:8080/" // Samsung S7 
+//"http://192.168.1.128:8080/" // Samsung S7
 
 String configFile; // XML configuration filename
 String[] saveFolder;
@@ -55,12 +55,12 @@ String[] httpUrlList;
 // Camera IP address list for remote focus and shutter trigger
 String[] udpIpList;
 String[] udpName;
-// File suffix attachment list 
+// File suffix attachment list
 String[] suffix;
 // HTTP Server description list
 String[] description;
- //filename starts with
-String[] filter; 
+//filename starts with
+String[] filter;
 // Rotate photo degrees
 int[] rotate;
 int[] flip;
@@ -102,8 +102,8 @@ boolean error = false;
 boolean portrait = false;
 boolean rawOnly = false;
 
-UdpClient[] client; 
-UdpClient broadcast; 
+UdpClient[] client;
+UdpClient broadcast;
 int udpPort[];
 int broadcastPort = 8000;
 String broadcastIp;
@@ -156,7 +156,7 @@ void draw() {
       exit();
       return;
     }
-
+    println(" pattern compile");
     pattern = Pattern.compile(PATTERN, Pattern.CASE_INSENSITIVE);
 
     //if (photosOnly) {
@@ -269,6 +269,7 @@ void draw() {
         while (fileIndex < fileList[listIndex].size()) {
           String[] str = fileList[listIndex].get(fileIndex);
           int num = 0;
+          println(str[0] + " "+saveFolder[listIndex] + " "+str[1]);
           num = rw.readWrite(str[0], saveFolder[listIndex], str[1], listIndex);
           if (num < 0) {
             showMsg("File write error: "+ saveFolder[listIndex]);
@@ -298,8 +299,8 @@ void draw() {
   }
 
   if (done) {
-    //text(str(total-skips) + " of "+ str(fileList.size())+ 
-    displayText(str(total-skips) + " of "+ total+ 
+    //text(str(total-skips) + " of "+ str(fileList.size())+
+    displayText(str(total-skips) + " of "+ total+
       " files transferred.");
     displayText(str(skips) +  " files already saved.");
     displayText("Done");
@@ -318,16 +319,16 @@ void draw() {
     for (int i=0; i<lastPhoto.length; i++) {
       try {
         if (i%2 == 0)
-          displayText(lastFile[i].substring(lastFile[i].lastIndexOf('/')+1));
+          displayText(lastFile[i].substring(lastFile[i].lastIndexOf(File.separator)+1));
         else
-          backLine(lastFile[i].substring(lastFile[i].lastIndexOf('/')+1), width/2);
+          backLine(lastFile[i].substring(lastFile[i].lastIndexOf(File.separator)+1), width/2);
         //println("display "+ lastFile[i]);
         if (display) {
           lastPhoto[i]= loadImage(lastFile[i]);
           float ar = ((float)lastPhoto[i].width)/ ((float)lastPhoto[i].height);
           //image(lastPhoto[i], i*width/2, height/2, (height/2)*ar, height/2);
           pushMatrix();
-          imageMode(CENTER); 
+          imageMode(CENTER);
           if (rotate[i]>0) {
             translate(width/4+i*width/2, height/2);
             rotate(radians(rotate[i]));
@@ -364,7 +365,7 @@ public ArrayList<String[]> loadList(String url, String suffix, String descriptio
   // read directory listing from server
   try {
     lines = loadStrings(url);
-  } 
+  }
   catch (Exception e) {
     errorMsg = e.toString();
     lines = null;
@@ -382,6 +383,7 @@ public ArrayList<String[]> loadList(String url, String suffix, String descriptio
 
   String str = new String();
   for (int i=0; i<lines.length; i++) {
+    println(lines[i]);
     str += lines[i];
   }
   matchPattern(str, url, fileList, suffix, filter);
@@ -401,28 +403,28 @@ public ArrayList<String[]> loadList(String url, String suffix, String descriptio
 }
 
 public class ReadWriteFile
-{    
+{
   public int readWrite(String inputUrl, String writeFolder, String suffix, int index)
-  { 
+  {
     int numberWritten = 0;
     URL url = null;
     try
     {
       url = new URL(inputUrl);
-    } 
-    catch (MalformedURLException e1) 
+    }
+    catch (MalformedURLException e1)
     {
       e1.printStackTrace();
       return numberWritten;
     }
-    //println("read " + inputUrl);
+    println("read " + inputUrl);
 
     try
     {
-      String filename = inputUrl.substring(inputUrl.lastIndexOf("/")+1);
-      //println("filename="+filename);
+      String filename = inputUrl.substring(inputUrl.lastIndexOf(File.separator)+1);
+      println("filename="+filename);
       if (suffix.equals("") ) {
-        //println("no suffix for URL");
+        println("no suffix for URL");
       } else {
         if (!hasSuffix(filename)) {
           String name = filename.substring(0, filename.lastIndexOf("."));
@@ -430,7 +432,11 @@ public class ReadWriteFile
           filename=name+suffix+filetype;
         }
       }
-      String dir = writeFolder;
+      File envdir = Environment.getExternalStorageDirectory();
+      String path = envdir.getAbsolutePath();
+      String dir = path+File.separator+writeFolder;
+      println("path="+path);
+      println("dir="+dir);
       File d = new File(dir);
       if (!d.exists()) {
         try {
@@ -447,16 +453,16 @@ public class ReadWriteFile
           e.printStackTrace();
         }
       }
-      String loc = writeFolder + "/" + filename;
+      String loc = path + File.separator + writeFolder + File.separator + filename;
       String filetype= filename.substring(filename.lastIndexOf(".")+1);
-      //println("File="+ loc + " Filetype="+filetype+ " index="+index);
+      println("File="+ loc + " Filetype="+filetype+ " index="+index);
       lastFile[index] = loc;
       File f = new File(loc);
-      if (f.exists()) { 
-        //println("Skip file already exists "+loc);
+      if (f.exists()) {
+        println("Skip file already exists "+loc);
       } else if (f.isDirectory()) {
         println("Skip file directory "+loc);
-      } else { 
+      } else {
         saveFile(inputUrl, loc);
         //image = ImageIO.read(url);
         //println("Write image " + filename);
@@ -465,7 +471,7 @@ public class ReadWriteFile
         numberWritten++;
       }
     }
-    catch (IOException e) 
+    catch (IOException e)
     {
       e.printStackTrace();
       return -1;
@@ -478,7 +484,7 @@ public class ReadWriteFile
     InputStream is = url.openStream();
     OutputStream os = new FileOutputStream(destinationFile);
 
-    byte[] b = new byte[1500]; 
+    byte[] b = new byte[1500];
     int length;
 
     while ((length = is.read(b)) != -1) {
@@ -492,7 +498,7 @@ public class ReadWriteFile
 
 public static boolean isPhoto(String s) {
   String lcs = s.toLowerCase();
-  return lcs.endsWith(".jpg") || lcs.endsWith(".png") || lcs.endsWith(".mpo") 
+  return lcs.endsWith(".jpg") || lcs.endsWith(".png") || lcs.endsWith(".mpo")
     || lcs.endsWith(".jps")     || lcs.endsWith(".dng") || lcs.endsWith(".srw")
     || lcs.endsWith(".gif") || lcs.endsWith(".webp")
     || lcs.endsWith(".jpeg") || lcs.endsWith(".bmp") || lcs.endsWith(".wbmp")
@@ -539,29 +545,35 @@ public static boolean isUrlVideo(String s) {
   return isVideo(s);
 }
 
-private void matchPattern(final String str, final String tUrl, 
+private void matchPattern(final String str, final String tUrl,
   final ArrayList<String[]> list, String suffix, String filter) {
+  println("tUrl = "+tUrl);
   Matcher m = pattern.matcher(str);
   println("match PATTERN ");
   while (m.find()) {
     String filename = null;
     String match = m.group(1);
     //println(match);
-    if (match != null && (isUrlPhoto(match) || isUrlVideo(match))) {
+    if (match != null && match.endsWith("_2x1.jpg") && (isUrlPhoto(match) || isUrlVideo(match))) {
+      println("MATCHING   "+match);
+      filename = tUrl + File.separator + match.substring(12);
+      //filename.replaceAll("\\", "/");
       if (match.startsWith("http://") || match.startsWith("https://")) {
         filename = match;
       } else if (match.startsWith("/") && !match.startsWith("/cgi")
         || match.startsWith("/image")) {
         //Log.d(TAG, "tUrl="+tUrl);
         String start = tUrl.substring(0, tUrl.indexOf("//") + 2);
+        
         //Log.d(TAG, "start=" + start);
         String remainder = tUrl.substring(tUrl.indexOf("//") + 2);
         //Log.d(TAG, "remainder=" + remainder);
-        int x = remainder.indexOf("/");
+        int x = remainder.indexOf("File.separator");
         if (x < 0)
           filename = (start + remainder + match);
         else
           filename = (start + remainder.substring(0, remainder.indexOf("/")) + match);
+        filename = "http://192.168.0.100/"+match;
       } else if (match.startsWith("../")) {
         filename = tUrl.substring(0, tUrl.lastIndexOf("/") + 1) +
           match.substring(0, match.lastIndexOf("/")) +
@@ -569,13 +581,15 @@ private void matchPattern(final String str, final String tUrl,
       } else {
         int q = match.lastIndexOf("?");
         if (q> 0) {
-          filename = (tUrl.substring(0, tUrl.lastIndexOf("/") + 1) + 
+          filename = (tUrl.substring(0, tUrl.lastIndexOf("/") + 1) +
             match.substring(0, q));
         } else {
-          filename = (tUrl.substring(0, tUrl.lastIndexOf("/") + 1) + 
+          filename = (tUrl.substring(0, tUrl.lastIndexOf("/") + 1) +
             match);
         }
-        //println("filename="+filename);
+        println("1 filename="+filename);
+        filename = tUrl + File.separator +"data"+File.separator+"images"+File.separator+match.substring(12);
+        println("new1 filename="+filename);
       }
     } else if (match != null && (isPhoto(match) || isVideo(match))) {
       if (match.startsWith("http://") || match.startsWith("https://")) {
@@ -583,13 +597,13 @@ private void matchPattern(final String str, final String tUrl,
       } else {
         int q = match.lastIndexOf("?");
         if (q> 0) {
-          filename = (tUrl.substring(0, tUrl.lastIndexOf("/") + 1) + 
+          filename = (tUrl.substring(0, tUrl.lastIndexOf("/") + 1) +
             match.substring(match.lastIndexOf("?") + 1));
         } else {
-          filename = (tUrl.substring(0, tUrl.lastIndexOf("/") + 1) + 
+          filename = (tUrl.substring(0, tUrl.lastIndexOf("/") + 1) +
             match);
         }
-        //println("filename="+filename);
+        println("2filename="+filename);
       }
     }
 
@@ -605,139 +619,151 @@ private void matchPattern(final String str, final String tUrl,
         }
       }
     }
-
-    if (filename != null) {
-      if(!(filename.substring(filename.lastIndexOf('/')+1).startsWith(filter))) {
-        filename = null;
+    println("test filename="+filename);
+    println();
+    try {
+      if (filename != null) {
+        //filename.replace("\\", File.separator);
+        //filename.replace("http://", "http://192.168.0.100:80/");
+        if (!filename.endsWith("_2x1.jpg")) filename = null;
+        println("found 2x1 "+filename);
+        //if (!(filename.substring(filename.lastIndexOf('/')+1).startsWith(filter))) {
+        //  filename = null;
+        //}
       }
     }
-    
-    if (filename != null) {
-      boolean found = false;
-      for (int i = 0; i < list.size(); i++) {
-        String[] strs = list.get(i);
-        if (strs[0].equals(filename)) {
-          found = true;
-          break;
+      catch(Exception eee) {
+        println(eee);
+        
+      }
+      
+
+        if (filename != null) {
+        boolean found = false;
+        for (int i = 0; i < list.size(); i++) {
+          String[] strs = list.get(i);
+          if (strs[0].equals(filename)) {
+            found = true;
+            break;
+          }
         }
+        if (!found) {
+          String[] store = new String[2];
+          store[0] = filename;
+          store[1] = getSuffix(suffix);
+          println("found in PATTERN " + filename);
+          list.add(store);
+        }
+        //println("found in PATTERN " + filename);
       }
-      if (!found) {
-        String[] store = new String[2];
-        store[0] = filename;
-        store[1] = getSuffix(suffix);
-        println("found in PATTERN " + filename);
-        list.add(store);
-      }
-      //println("found in PATTERN " + filename);
     }
   }
-}
 
-String getSuffix(String suffix) {
-  String sym = "#";
-  int i = suffix.indexOf(sym);
-  String sCounter = "0";
-  if (i>=0) {
-    fileCounter++;
-    if (fileCounter<10)
-      sCounter = "00"+str(fileCounter);
-    else if (fileCounter<100)
-      sCounter = "0"+str(fileCounter);
-    else
-      sCounter = str(fileCounter);
-    String result = suffix.replace(sym, sCounter);
-    return result;
+  String getSuffix(String suffix) {
+    String sym = "#";
+    int i = suffix.indexOf(sym);
+    String sCounter = "0";
+    if (i>=0) {
+      fileCounter++;
+      if (fileCounter<10)
+        sCounter = "00"+str(fileCounter);
+      else if (fileCounter<100)
+        sCounter = "0"+str(fileCounter);
+      else
+        sCounter = str(fileCounter);
+      String result = suffix.replace(sym, sCounter);
+      return result;
+    }
+    return suffix;
   }
-  return suffix;
-}
 
-public static final Comparator<String> CASE_INSENSITIVE_PAIR_ORDER
-  = new CaseInsensitivePairComparator();
+  public static final Comparator<String> CASE_INSENSITIVE_PAIR_ORDER
+    = new CaseInsensitivePairComparator();
 
-private static class CaseInsensitivePairComparator
-  implements Comparator<String>, java.io.Serializable {
-  // use serialVersionUID from JDK 1.2.2 for interoperability
-  private static final long serialVersionUID = 8575799808933029326L;
+  private static class CaseInsensitivePairComparator
+    implements Comparator<String>, java.io.Serializable {
+    // use serialVersionUID from JDK 1.2.2 for interoperability
+    private static final long serialVersionUID = 8575799808933029326L;
 
-  public int compare(String s1, String s2) {
-    String las1 = s1.substring(s1.lastIndexOf('/'), s1.lastIndexOf('.'));
-    String las2 = s2.substring(s2.lastIndexOf('/'), s2.lastIndexOf('.'));
-    int n1 = las1.length();
-    int n2 = las2.length();
-    int min = Math.min(n1, n2);
-    for (int i = 0; i < min; i++) {
-      char c1 = las1.charAt(i);
-      char c2 = las2.charAt(i);
-      if (c1 != c2) {
-        c1 = Character.toUpperCase(c1);
-        c2 = Character.toUpperCase(c2);
+    public int compare(String s1, String s2) {
+      String las1 = s1.substring(s1.lastIndexOf('/'), s1.lastIndexOf('.'));
+      String las2 = s2.substring(s2.lastIndexOf('/'), s2.lastIndexOf('.'));
+      int n1 = las1.length();
+      int n2 = las2.length();
+      int min = Math.min(n1, n2);
+      for (int i = 0; i < min; i++) {
+        char c1 = las1.charAt(i);
+        char c2 = las2.charAt(i);
         if (c1 != c2) {
-          c1 = Character.toLowerCase(c1);
-          c2 = Character.toLowerCase(c2);
+          c1 = Character.toUpperCase(c1);
+          c2 = Character.toUpperCase(c2);
           if (c1 != c2) {
-            // No overflow because of numeric promotion
-            return c1 - c2;
+            c1 = Character.toLowerCase(c1);
+            c2 = Character.toLowerCase(c2);
+            if (c1 != c2) {
+              // No overflow because of numeric promotion
+              return c1 - c2;
+            }
           }
         }
       }
+      return n1 - n2;
     }
-    return n1 - n2;
   }
-}
 
-//-----------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------
 
-public String getDateTime() {
-  Date current_date = new Date();
-  String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(current_date);
-  return timeStamp;
-}
+  public String getDateTime() {
+    Date current_date = new Date();
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(current_date);
+    return timeStamp;
+  }
 
-public String getWifiBroadcastIpAddress() {
-  try {
-    for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
-      .hasMoreElements(); ) {
-      NetworkInterface intf = en.nextElement();
-      Enumeration<NetworkInterface> niEnum = NetworkInterface.getNetworkInterfaces();
-      while (niEnum.hasMoreElements())
-      {
-        NetworkInterface ni = niEnum.nextElement();
-        if (!ni.isLoopback()) {
-          for (InterfaceAddress interfaceAddress : ni.getInterfaceAddresses())
-          {
-            if (interfaceAddress.getBroadcast()!= null) {
-              //println(interfaceAddress.getBroadcast().toString());
-              return (interfaceAddress.getBroadcast().toString().substring(1));
+  public String getWifiBroadcastIpAddress() {
+    try {
+      for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
+        .hasMoreElements(); ) {
+        NetworkInterface intf = en.nextElement();
+        Enumeration<NetworkInterface> niEnum = NetworkInterface.getNetworkInterfaces();
+        while (niEnum.hasMoreElements())
+        {
+          NetworkInterface ni = niEnum.nextElement();
+          if (!ni.isLoopback()) {
+            for (InterfaceAddress interfaceAddress : ni.getInterfaceAddresses())
+            {
+              if (interfaceAddress.getBroadcast()!= null) {
+                //println(interfaceAddress.getBroadcast().toString());
+                return (interfaceAddress.getBroadcast().toString().substring(1));
+              }
             }
           }
         }
       }
     }
-  } 
-  catch (SocketException ex) {
-    println(ex.toString());
+    catch (SocketException ex) {
+      println(ex.toString());
+    }
+    return null;
   }
-  return null;
-}
 
-//String[] getPage(String filename) {
-//  String[] result = null;  
-//  HttpURLConnection urlConnection = null;
-//  try {
-//    URL url = new URL(filename);
+  //String[] getPage(String filename) {
+  //  String[] result = null;
+  //  HttpURLConnection urlConnection = null;
+  //  try {
+  //    URL url = new URL(filename);
 
-//    urlConnection = (HttpURLConnection) url.openConnection();
-//    urlConnection.setRequestMethod("GET");
-//    urlConnection.setDoInput(true);
-//    urlConnection.addRequestProperty("User-Agent", "SPViewer");
-//    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-//    result = loadStrings(in);
-//  } 
-//  catch (Exception e) {
-//  } 
-//  finally {
-//    if (urlConnection != null)
-//      urlConnection.disconnect();
-//  }
-//  return result;
-//}
+  //    urlConnection = (HttpURLConnection) url.openConnection();
+  //    urlConnection.setRequestMethod("GET");
+  //    urlConnection.setDoInput(true);
+  //    urlConnection.addRequestProperty("User-Agent", "SPViewer");
+  //    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+  //    result = loadStrings(in);
+  //  }
+  //  catch (Exception e) {
+  //  }
+  //  finally {
+  //    if (urlConnection != null)
+  //      urlConnection.disconnect();
+  //  }
+  //  return result;
+  //}

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<configuration>
+  <storage
+    rawOnly="false"
+	/>
+  <httpserver  
+    httpurl= "http://192.168.0.100:80"
+	name= "Photobooth"
+	savefolder = "Pictures/Photobooth"
+	suffix= ""
+	rotate= "0"
+	flip= "0"
+	/>
+</configuration>
